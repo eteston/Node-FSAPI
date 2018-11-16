@@ -269,61 +269,7 @@ server.get(commandRegEx, function (req, res, next) {
     var path = config.base + "/" + req.params[2];
 
     switch (req.params[1]) {
-        // List contents of directory
-        case "dir":
-            fs.readdir(path, function (err, files) {
-                if (err) {
-                    resError(101, err, res);
-                } else {
-
-                    // Ensure ending slash on path
-                    (path.slice(-1)!=="/") ? path = path + "/" : path = path;
-
-                    var output = {},
-                        output_dirs = {},
-                        output_files = {},
-                        current,
-                        relpath,
-                        link;
-
-                    // Function to build item for output objects
-                    var createItem = function (current, relpath, type, link) {
-                        return {
-                            path: relpath.replace('//','/'),
-                            type: type,
-                            size: fs.lstatSync(current).size,
-                            atime: fs.lstatSync(current).atime.getTime(),
-                            mtime: fs.lstatSync(current).mtime.getTime(),
-                            link: link
-                        };
-                    };
-
-                    // Sort alphabetically
-                    files.sort();
-
-                    // Loop through and create two objects
-                    // 1. Directories
-                    // 2. Files
-                    for (var i=0, z=files.length-1; i<=z; i++) {
-                        current = path + files[i];
-                        relpath = current.replace(config.base,"");
-                        (fs.lstatSync(current).isSymbolicLink()) ? link = true : link = false;
-                        if (fs.lstatSync(current).isDirectory()) {
-                            output_dirs[files[i]] = createItem(current,relpath,"directory",link);
-                        } else {
-                            output_files[files[i]] = createItem(current,relpath,"file",link);
-                        }
-                    }
-
-                    // Merge so we end up with alphabetical directories, then files
-                    output = merge(output_dirs,output_files);
-
-                    // Send output
-                    resSuccess(output, res);
-                }
-            });
-            break;
-
+        
         // Return contents of requested file
         case "file":
           fs.readFile(path, function (err, data) {
