@@ -6,6 +6,11 @@ var config = {
         "12345",
         "67890"
     ],
+    // Authentication keys edit
+    keysEdit: [
+        "abcde",
+        "fghij"
+    ],
     /**
      * Allowed IP's or ranges
      * Can use * for wildcards, *.*.*.* for no restrictions
@@ -105,6 +110,19 @@ var checkKey = function (config, req) {
 };
 
 /**
+ * Check Key Edit (Called by checkReqEdit)
+ */
+var checkKeyEdit = function (config, req) {
+    // Loop through keys in config
+    for (var i = 0, z = config.keys.length; i < z; i++) {
+        if (config.keysEdit[i] === req.params[0]) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
  * Check IP (Called by checkReq)
  */
 
@@ -142,6 +160,25 @@ var checkReq = function (config, req, res) {
 
     // Check key and IP
     if(!checkKey(config, req) || !checkIP(config, req)) {
+        res.send(401);
+        return false;
+    }
+
+    return true;
+};
+
+/**
+ * Check Request Edit
+ * Checks Key Edit and IP Address
+ */
+
+var checkReqEdit = function (config, req, res) {
+
+    // Set access control headers
+    res.header('Access-Control-Allow-Origin', '*');
+
+    // Check key and IP
+    if(!checkKeyEdit(config, req) || !checkIP(config, req)) {
         res.send(401);
         return false;
     }
@@ -321,7 +358,7 @@ server.get(commandRegEx, function (req, res, next) {
 server.post(commandRegEx, function (req, res, next) {
 
     // Check request
-    checkReq(config, req, res);
+    checkReqEdit(config, req, res);
 
     // Set path
     var path = config.base + "/" + req.params[2];
@@ -417,7 +454,7 @@ server.post(commandRegEx, function (req, res, next) {
 server.put(commandRegEx, function (req, res, next) {
 
     // Check request
-    checkReq(config, req, res);
+    checkReqEdit(config, req, res);
 
     // Set path
     var path = config.base + "/" + req.params[2];
@@ -489,7 +526,7 @@ server.put(commandRegEx, function (req, res, next) {
 server.del(pathRegEx, function (req, res, next) {
 
     // Check request
-    checkReq(config, req, res);
+    checkReqEdit(config, req, res);
 
     // Set path
     var path = config.base + "/" + req.params[1];
